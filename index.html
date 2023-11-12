@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #ffffff, #ff66b2);
+            color: #fff;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #d81b60;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #d81b60;
+            text-align: left;
+        }
+
+        input {
+            padding: 10px;
+            width: calc(100% - 20px);
+            margin: 0 auto;
+            display: block;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            border: 1px solid #d81b60;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: #d81b60;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #ad1457;
+        }
+
+        .output {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #d81b60;
+        }
+
+        .output span {
+            color: #ad1457;
+        }
+
+        h2 {
+            color: #ff66b2;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Time Converter</h1>
+        <div>
+            <label for="usTime">Autumn's Time (America):</label>
+            <input type="text" id="usTime" placeholder="Enter her time (HH:mm)">
+            <div class="output" id="outputIndiaTime"></div>
+            <button onclick="convertToIndiaTime()">Convert to Pratik's Time (India)</button>
+        </div>
+        <div>
+            <label for="indiaTime">Pratik's Time (India):</label>
+            <input type="text" id="indiaTime" placeholder="Enter his time (HH:mm)">
+            <div class="output" id="outputUSTime"></div>
+            <button onclick="convertToUSTime()">Convert to Autumn's Time (America)</button>
+        </div>
+        <div>
+            <h2>Live Time</h2>
+            <div class="output" id="liveTimeUS"></div>
+            <div class="output" id="liveTimeIndia"></div>
+        </div>
+    </div>
+    <script>
+        async function convertToIndiaTime() {
+            const usTimeInput = document.getElementById('usTime');
+            const outputIndiaTime = document.getElementById('outputIndiaTime');
+
+            const usTime = usTimeInput.value.trim();
+            if (!usTime) return;
+
+            const [usHours, usMinutes] = usTime.split(':');
+
+            try {
+                const response = await fetch('http://worldtimeapi.org/api/timezone/America/New_York');
+                const data = await response.json();
+
+                const indiaDate = new Date(data.utc_datetime);
+                indiaDate.setUTCHours(parseInt(usHours, 10));
+                indiaDate.setUTCMinutes(parseInt(usMinutes, 10));
+
+                const indiaHours = String(indiaDate.getUTCHours()).padStart(2, '0');
+                const indiaMinutes = String(indiaDate.getUTCMinutes()).padStart(2, '0');
+
+                outputIndiaTime.innerHTML = `Love Time (India): <span>${indiaHours}:${indiaMinutes}</span>`;
+            } catch (error) {
+                console.error('Error fetching data from WorldTimeAPI:', error);
+            }
+        }
+
+        async function convertToUSTime() {
+            const indiaTimeInput = document.getElementById('indiaTime');
+            const outputUSTime = document.getElementById('outputUSTime');
+
+            const indiaTime = indiaTimeInput.value.trim();
+            if (!indiaTime) return;
+
+            const [indiaHours, indiaMinutes] = indiaTime.split(':');
+
+            try {
+                const response = await fetch('http://worldtimeapi.org/api/timezone/Asia/Kolkata');
+                const data = await response.json();
+
+                const usDate = new Date(data.utc_datetime);
+                usDate.setUTCHours(parseInt(indiaHours, 10));
+                usDate.setUTCMinutes(parseInt(indiaMinutes, 10));
+
+                const usHours = String(usDate.getUTCHours()).padStart(2, '0');
+                const usMinutes = String(usDate.getUTCMinutes()).padStart(2, '0');
+
+                outputUSTime.innerHTML = `Love Time (America): <span>${usHours}:${usMinutes}</span>`;
+            } catch (error) {
+                console.error('Error fetching data from WorldTimeAPI:', error);
+            }
+        }
+
+        async function updateLiveTime() {
+            const liveTimeUS = document.getElementById('liveTimeUS');
+            const liveTimeIndia = document.getElementById('liveTimeIndia');
+
+            try {
+                const responseUS = await fetch('http://worldtimeapi.org/api/timezone/America/New_York');
+                const dataUS = await responseUS.json();
+
+                const usHours = String(dataUS.datetime.slice(11, 13)).padStart(2, '0');
+                const usMinutes = String(dataUS.datetime.slice(14, 16)).padStart(2, '0');
+                liveTimeUS.innerHTML = `Live Time (America): <span>${usHours}:${usMinutes}</span>`;
+            } catch (error) {
+                console.error('Error fetching data from WorldTimeAPI for USA:', error);
+            }
+
+            try {
+                const responseIndia = await fetch('http://worldtimeapi.org/api/timezone/Asia/Kolkata');
+                const dataIndia = await responseIndia.json();
+
+                const indiaHours = String(dataIndia.datetime.slice(11, 13)).padStart(2, '0');
+                const indiaMinutes = String(dataIndia.datetime.slice(14, 16)).padStart(2, '0');
+                liveTimeIndia.innerHTML = `Live Time (India): <span>${indiaHours}:${indiaMinutes}</span>`;
+            } catch (error) {
+                console.error('Error fetching data from WorldTimeAPI for India:', error);
+            }
+        }
+
+        // Update live time every second
+        setInterval(updateLiveTime, 1000);
+
+        // Initial live time update
+        updateLiveTime();
+    </script>
+</body>
+
+</html>
